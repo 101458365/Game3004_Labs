@@ -28,16 +28,21 @@ public class PlayerBehaviour : MonoBehaviour
     InputActionAsset inputActions;
     InputAction movementInput;
     InputAction jumpInput;
+    InputAction pickaxeInput;
+
+    Animator animator;
 
     void Start()
     {
         controller = GetComponent<CharacterController>();
         movementInput = inputActions.FindAction("Move");
         jumpInput = inputActions.FindAction("Jump");
+        pickaxeInput = inputActions.FindAction("PickaxeSwing");
 
         currentHealth = maxHealth;
         if (healthBar != null)
             healthBar.SetMaxHealth(maxHealth);
+        animator = GetComponent<Animator>();
     }
 
     void Update()
@@ -58,6 +63,11 @@ public class PlayerBehaviour : MonoBehaviour
 
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
+
+        if (pickaxeInput.IsPressed())
+        {
+            animator.SetTrigger("Swingger");
+        }
     }
 
     public void TakeDamage(float amount)
@@ -90,6 +100,12 @@ public class PlayerBehaviour : MonoBehaviour
         {
             Debug.Log("owie");
             TakeDamage(10f); 
+        }
+
+        if(other.CompareTag("Tile"))
+        {
+            Debug.Log("Minor");
+            Destroy(other);
         }
     }
 
