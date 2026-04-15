@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 7498827500119904059}
   - component: {fileID: 4582036377109773088}
   - component: {fileID: -4482043867154739236}
+  - component: {fileID: -8887377214798730562}
   m_Layer: 3
   m_Name: 3dTile
   m_TagString: Tile
@@ -124,3 +125,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 408f020828125e3418a8fe1fcebae5f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TilePrefab_behave
+--- !u!114 &-8887377214798730562
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4813606188238016000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e06a440d9a37c14eb56d4ebc39bb2a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TileBehaviour
+  isActiveTile: 1
+  neighborTiles:
+  - {fileID: 0}
+  tileType: 0

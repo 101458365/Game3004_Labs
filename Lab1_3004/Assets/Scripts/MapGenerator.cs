@@ -22,6 +22,7 @@ public class MapGenerator : MonoBehaviour
     public float max = 24.00f;
 
     List<GameObject> grid = new List<GameObject>();
+    List<GameObject> disabledTiles = new List<GameObject>();
 
     private int collisionCounter;
     private int startHeight, startWidth, startDepth;
@@ -51,7 +52,9 @@ public class MapGenerator : MonoBehaviour
         {
             Destroy(tile);
         }
+
         grid.Clear();
+        disabledTiles.Clear();
     }
 
     private void Initialize()
@@ -75,7 +78,10 @@ public class MapGenerator : MonoBehaviour
             {
                 for (int z = 0; z < depth; z++)
                 {
-                    var perlinNoiseValue = Mathf.PerlinNoise((x + offsetX) / randomScale, (z + offsetZ) / randomScale) * depth * 0.5f;
+                    var perlinNoiseValue = Mathf.PerlinNoise(
+                        (x + offsetX) / randomScale,
+                        (z + offsetZ) / randomScale
+                    ) * depth * 0.5f;
 
                     if (y < perlinNoiseValue)
                     {
@@ -90,20 +96,42 @@ public class MapGenerator : MonoBehaviour
 
     private void OptimizingCollisionsAndMeshes()
     {
-        // Detect if each tile had "Contacts with other tiles on each face around itself"
-        var normalArray = new Vector3[] { Vector3.up, Vector3.down, Vector3.forward, Vector3.back, Vector3.right, Vector3.left };
-        List<GameObject> disabledTiles = new List<GameObject>();
+        disabledTiles.Clear();
+
+        var normalArray = new Vector3[]
+        {
+            Vector3.up, Vector3.down,
+            Vector3.forward, Vector3.back,
+            Vector3.right, Vector3.left
+        };
 
         foreach (GameObject tile in grid)
         {
             collisionCounter = 0;
+
+            RaycastHit hit;
+
             for (int i = 0; i < normalArray.Length; i++)
             {
-                if (Physics.Raycast(tile.transform.position, normalArray[i], tile.transform.localScale.magnitude * 0.5f))
+                bool isHitted = Physics.Raycast(
+                    tile.transform.position,
+                    normalArray[i],
+                    out hit,
+                    tile.transform.localScale.magnitude * 0.5f
+                );
+
+                if (isHitted && hit.collider.CompareTag("Tile"))
                 {
-                    collisionCounter++;
+                    TileBehaviour neighbor = hit.transform.GetComponent<TileBehaviour>();
+
+                    if (neighbor != null)
+                    {
+                        neighbor.AddNeighborTile(tile);
+                        collisionCounter++;
+                    }
                 }
             }
+
             if (collisionCounter > 5)
             {
                 disabledTiles.Add(tile);
@@ -112,11 +140,16 @@ public class MapGenerator : MonoBehaviour
 
         foreach (GameObject tile in disabledTiles)
         {
-            var boxCollider = tile.GetComponent<BoxCollider>();
-            var meshRenderer = tile.GetComponent<MeshRenderer>();
+            TileBehaviour tb = tile.GetComponent<TileBehaviour>();
 
-            boxCollider.enabled = false;
-            meshRenderer.enabled = false;
+            if (tb != null)
+            {
+                tb.InactivateTiles();
+            }
+            else
+            {
+                Debug.LogError($"Missing TileBehaviour on {tile.name}");
+            }
         }
     }
 }
